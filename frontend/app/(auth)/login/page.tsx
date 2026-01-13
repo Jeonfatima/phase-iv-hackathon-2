@@ -12,7 +12,7 @@ export default function LoginPage() {
   // Redirect to dashboard if already authenticated
   React.useEffect(() => {
     if (isAuthenticated) {
-      router.push('/');
+      router.push('/dashboard');
     }
   }, [isAuthenticated, router]);
 

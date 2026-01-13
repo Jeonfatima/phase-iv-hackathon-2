@@ -12,13 +12,19 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
   const [isEditing, setIsEditing] = React.useState(false);
   const [editTitle, setEditTitle] = React.useState(task.title);
   const [editDescription, setEditDescription] = React.useState(task.description || '');
+  const [isDeleting, setIsDeleting] = React.useState(false);
 
   const handleToggleCompletion = () => {
     toggleTaskCompletion(task.id);
   };
 
-  const handleDelete = () => {
-    deleteTask(task.id);
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      await deleteTask(task.id);
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const handleEdit = () => {
@@ -42,27 +48,40 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
   };
 
   return (
-    <div className={`border rounded-lg p-4 shadow-sm ${task.completed ? 'bg-green-50' : 'bg-white'}`}>
+    <div className={`border border-gray-200 rounded-xl p-4 shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-[1.02] ${
+      task.completed
+        ? 'bg-[#F0FFDF] border-[#A8DF8E]'
+        : 'bg-white border-gray-200'
+    }`}>
       {isEditing ? (
         <div className="space-y-3">
           <input
             type="text"
             value={editTitle}
             onChange={(e) => setEditTitle(e.target.value)}
-            className="w-full p-2 border rounded-md text-lg font-medium"
+            className="w-full p-3 border border-gray-300 rounded-xl text-lg font-medium text-gray-900 focus:border-[#A8DF8E] focus:outline-none transition-colors"
             autoFocus
           />
           <textarea
             value={editDescription}
             onChange={(e) => setEditDescription(e.target.value)}
-            className="w-full p-2 border rounded-md"
+            className="w-full p-3 border border-gray-300 rounded-xl text-gray-900 focus:border-[#A8DF8E] focus:outline-none transition-colors resize-none"
             rows={3}
           />
           <div className="flex space-x-2">
-            <Button size="sm" onClick={handleSave}>
+            <Button
+              size="sm"
+              className="bg-[#A8DF8E] hover:bg-[#97ce7e] text-white rounded-xl shadow-sm hover:scale-105 transition-transform"
+              onClick={handleSave}
+            >
               Save
             </Button>
-            <Button variant="outline" size="sm" onClick={handleCancel}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-gray-300 hover:bg-gray-50 rounded-xl hover:scale-105 transition-transform"
+              onClick={handleCancel}
+            >
               Cancel
             </Button>
           </div>
@@ -74,12 +93,12 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
               type="checkbox"
               checked={task.completed}
               onChange={handleToggleCompletion}
-              className="mt-1 h-4 w-4 text-indigo-600 rounded focus:ring-indigo-500"
+              className="mt-1 h-5 w-5 text-[#A8DF8E] rounded focus:ring-[#A8DF8E]"
             />
             <div className="ml-3 flex-1">
               <h3
                 className={`text-lg font-medium ${
-                  task.completed ? 'line-through text-gray-500' : 'text-gray-900'
+                  task.completed ? 'line-through text-gray-600' : 'text-gray-900'
                 }`}
               >
                 {task.title}
@@ -87,23 +106,36 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
               {task.description && (
                 <p
                   className={`mt-1 text-sm ${
-                    task.completed ? 'line-through text-gray-400' : 'text-gray-500'
+                    task.completed ? 'line-through text-gray-500' : 'text-gray-600'
                   }`}
                 >
                   {task.description}
                 </p>
               )}
-              <div className="mt-2 text-xs text-gray-400">
+              <div className="mt-2 text-xs text-gray-500">
                 Created: {new Date(task.created_at).toLocaleDateString()}
               </div>
             </div>
           </div>
           <div className="mt-3 flex justify-end space-x-2">
-            <Button variant="outline" size="sm" onClick={handleEdit}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-gray-300 hover:bg-gray-50 rounded-xl hover:scale-105 transition-transform"
+              onClick={handleEdit}
+            >
               Edit
             </Button>
-            <Button variant="danger" size="sm" onClick={handleDelete}>
-              Delete
+            <Button
+              variant="danger"
+              size="sm"
+              className={`bg-[#FFD8DF] hover:bg-[#FFB3BA] text-[#FF5C6C] rounded-xl shadow-sm hover:scale-105 transition-transform ${
+                isDeleting ? 'opacity-75 cursor-not-allowed' : ''
+              }`}
+              onClick={handleDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? 'Deleting...' : 'Delete'}
             </Button>
           </div>
         </div>

@@ -92,7 +92,7 @@ export const useAuthState = () => {
         // Show success message - this will be handled in the component
         alert('Registration successful! Now go to login to continue.');
         // Optionally redirect to login page
-        // window.location.href = '/auth/login';
+        // window.location.href = '/login';
       }
     } catch (error: any) {
       setRegisterForm(prev => ({

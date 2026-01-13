@@ -22,9 +22,9 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onSubmit, loading }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4 bg-white p-6 rounded-2xl shadow-md border border-gray-100">
       <div>
-        <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
           Task Title
         </label>
         <Input
@@ -33,13 +33,13 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onSubmit, loading }) => {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="What needs to be done?"
-          className="w-full"
+          className="w-full p-3 rounded-xl border-gray-300 focus:border-[#A8DF8E] focus:ring-[#A8DF8E] text-gray-900"
           required
         />
       </div>
 
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
           Description (Optional)
         </label>
         <textarea
@@ -47,13 +47,19 @@ export const TaskForm: React.FC<TaskFormProps> = ({ onSubmit, loading }) => {
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Add details..."
-          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+          className="block w-full rounded-xl border-gray-300 focus:border-[#A8DF8E] focus:ring-[#A8DF8E] sm:text-sm p-3 border border-gray-300 text-gray-900 resize-none"
           rows={2}
         />
       </div>
 
       <div>
-        <Button type="submit" disabled={loading || !title.trim()}>
+        <Button
+          type="submit"
+          disabled={loading || !title.trim()}
+          className={`w-full bg-[#A8DF8E] hover:bg-[#97ce7e] text-white rounded-xl shadow-sm hover:scale-[1.02] transition-transform ${
+            (loading || !title.trim()) ? 'opacity-75 cursor-not-allowed' : ''
+          }`}
+        >
           {loading ? 'Adding task...' : 'Add Task'}
         </Button>
       </div>
