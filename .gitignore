@@ -31,8 +31,19 @@ venv/
 env/
 ENV/
 .env
+.env.local
+.env.dev
+.env.production
 .pyre/
 .mypy_cache/
+
+# Database files
+*.db
+*.db-journal
+
+# Local environment files
+backend/.env
+frontend/.env
 
 # FastAPI / Uvicorn
 *.log
