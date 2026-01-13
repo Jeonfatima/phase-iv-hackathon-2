@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "next": "^14.3.2",
     "next-auth": "^4.24.13"
   }
 }
