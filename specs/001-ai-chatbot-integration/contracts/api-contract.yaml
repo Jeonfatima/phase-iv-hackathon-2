@@ -1,0 +1,438 @@
+# API Contract: AI Chatbot Integration
+
+## Overview
+
+This document defines the API contracts for the AI Todo Chatbot Integration, specifying the endpoints, request/response formats, and data schemas required for the natural language task management system.
+
+## Base URL
+
+```
+http://localhost:8000/api (development)
+https://your-domain.com/api (production)
+```
+
+## Authentication
+
+All endpoints require JWT authentication in the Authorization header:
+
+```
+Authorization: Bearer {jwt_token}
+```
+
+The JWT token must contain user identity information for proper user isolation.
+
+## Endpoints
+
+### 1. Chat Interaction Endpoint
+
+**POST** `/api/{user_id}/chat`
+
+#### Description
+Processes natural language input and returns AI-generated responses with tool execution results.
+
+#### Path Parameters
+| Parameter | Type   | Description |
+|-----------|--------|-------------|
+| user_id   | string | The authenticated user's ID for isolation |
+
+#### Request Body
+```json
+{
+  "conversation_id": {
+    "type": "integer",
+    "description": "Optional conversation ID to continue existing conversation, creates new if omitted",
+    "nullable": true
+  },
+  "message": {
+    "type": "string",
+    "description": "The user's natural language message",
+    "minLength": 1,
+    "maxLength": 1000
+  }
+}
+```
+
+#### Example Request
+```json
+{
+  "conversation_id": 123,
+  "message": "Add a task to buy groceries"
+}
+```
+
+#### Response Schema
+```json
+{
+  "type": "object",
+  "properties": {
+    "conversation_id": {
+      "type": "integer",
+      "description": "ID of the conversation (newly created if not provided)"
+    },
+    "response": {
+      "type": "string",
+      "description": "The AI-generated response to display to the user"
+    },
+    "tool_calls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the tool that was called"
+          },
+          "arguments": {
+            "type": "object",
+            "description": "Arguments passed to the tool"
+          },
+          "result": {
+            "type": "object",
+            "description": "Result of the tool execution"
+          }
+        }
+      },
+      "description": "Array of tool calls executed during processing (optional)"
+    },
+    "message_id": {
+      "type": "integer",
+      "description": "ID of the newly created message in the database"
+    }
+  },
+  "required": ["conversation_id", "response", "message_id"]
+}
+```
+
+#### Example Response
+```json
+{
+  "conversation_id": 123,
+  "response": "I've added the task 'buy groceries' to your list.",
+  "tool_calls": [
+    {
+      "name": "add_task",
+      "arguments": {
+        "title": "buy groceries"
+      },
+      "result": {
+        "success": true,
+        "task_id": 456,
+        "message": "Task 'buy groceries' added successfully"
+      }
+    }
+  ],
+  "message_id": 789
+}
+```
+
+#### Error Responses
+- `401 Unauthorized`: Invalid or missing JWT token
+- `403 Forbidden`: Attempting to access another user's data
+- `422 Unprocessable Entity`: Invalid request body format
+- `500 Internal Server Error`: Server error during processing
+
+### 2. Get User Conversations
+
+**GET** `/api/users/{user_id}/conversations`
+
+#### Description
+Retrieves a list of conversations for the specified user.
+
+#### Path Parameters
+| Parameter | Type   | Description |
+|-----------|--------|-------------|
+| user_id   | string | The authenticated user's ID |
+
+#### Query Parameters
+| Parameter | Type    | Required | Description |
+|-----------|---------|----------|-------------|
+| limit     | integer | false    | Maximum number of conversations to return (default: 20) |
+| offset    | integer | false    | Number of conversations to skip (default: 0) |
+| sort      | string  | false    | Sort order: "recent_first" or "oldest_first" (default: "recent_first") |
+
+#### Response Schema
+```json
+{
+  "type": "object",
+  "properties": {
+    "conversations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Unique identifier for the conversation"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the conversation was created"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the conversation was last updated"
+          },
+          "message_count": {
+            "type": "integer",
+            "description": "Number of messages in the conversation"
+          }
+        }
+      }
+    },
+    "total_count": {
+      "type": "integer",
+      "description": "Total number of conversations for the user"
+    }
+  },
+  "required": ["conversations", "total_count"]
+}
+```
+
+#### Example Response
+```json
+{
+  "conversations": [
+    {
+      "id": 123,
+      "created_at": "2026-01-15T10:30:00Z",
+      "updated_at": "2026-01-15T11:45:00Z",
+      "message_count": 15
+    },
+    {
+      "id": 122,
+      "created_at": "2026-01-14T09:15:00Z",
+      "updated_at": "2026-01-14T10:20:00Z",
+      "message_count": 8
+    }
+  ],
+  "total_count": 2
+}
+```
+
+### 3. Get Conversation Messages
+
+**GET** `/api/conversations/{conversation_id}/messages`
+
+#### Description
+Retrieves all messages in a specific conversation.
+
+#### Path Parameters
+| Parameter       | Type    | Description |
+|-----------------|---------|-------------|
+| conversation_id | integer | Unique identifier for the conversation |
+
+#### Query Parameters
+| Parameter | Type    | Required | Description |
+|-----------|---------|----------|-------------|
+| limit     | integer | false    | Maximum number of messages to return (default: 50) |
+| offset    | integer | false    | Number of messages to skip (default: 0) |
+
+#### Response Schema
+```json
+{
+  "type": "object",
+  "properties": {
+    "messages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Unique identifier for the message"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["user", "assistant", "tool"],
+            "description": "Role of the message sender"
+          },
+          "content": {
+            "type": "string",
+            "description": "Content of the message"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the message was created"
+          }
+        }
+      }
+    },
+    "conversation_id": {
+      "type": "integer",
+      "description": "ID of the conversation these messages belong to"
+    }
+  },
+  "required": ["messages", "conversation_id"]
+}
+```
+
+#### Example Response
+```json
+{
+  "messages": [
+    {
+      "id": 456,
+      "role": "user",
+      "content": "Add a task to buy groceries",
+      "timestamp": "2026-01-15T10:30:00Z"
+    },
+    {
+      "id": 457,
+      "role": "assistant",
+      "content": "I've added the task 'buy groceries' to your list.",
+      "timestamp": "2026-01-15T10:30:05Z"
+    }
+  ],
+  "conversation_id": 123
+}
+```
+
+## Tool Schemas
+
+### add_task Tool
+```json
+{
+  "name": "add_task",
+  "description": "Creates a new task with title and optional description",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "title": {
+        "type": "string",
+        "description": "The title of the task to create"
+      },
+      "description": {
+        "type": "string",
+        "description": "Optional description for the task"
+      }
+    },
+    "required": ["title"]
+  }
+}
+```
+
+### delete_task Tool
+```json
+{
+  "name": "delete_task",
+  "description": "Deletes an existing task by its ID",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "task_id": {
+        "type": "integer",
+        "description": "The ID of the task to delete"
+      }
+    },
+    "required": ["task_id"]
+  }
+}
+```
+
+### update_task Tool
+```json
+{
+  "name": "update_task",
+  "description": "Updates properties of an existing task",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "task_id": {
+        "type": "integer",
+        "description": "The ID of the task to update"
+      },
+      "title": {
+        "type": "string",
+        "description": "New title for the task (optional)"
+      },
+      "description": {
+        "type": "string",
+        "description": "New description for the task (optional)"
+      },
+      "completed": {
+        "type": "boolean",
+        "description": "New completion status for the task (optional)"
+      }
+    },
+    "required": ["task_id"]
+  }
+}
+```
+
+### complete_task Tool
+```json
+{
+  "name": "complete_task",
+  "description": "Marks a task as complete or incomplete",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "task_id": {
+        "type": "integer",
+        "description": "The ID of the task to update"
+      },
+      "completed": {
+        "type": "boolean",
+        "description": "Whether the task should be marked as completed"
+      }
+    },
+    "required": ["task_id", "completed"]
+  }
+}
+```
+
+### list_tasks Tool
+```json
+{
+  "name": "list_tasks",
+  "description": "Retrieves all tasks for the current user with optional filtering",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "filter": {
+        "type": "string",
+        "enum": ["all", "pending", "completed"],
+        "description": "Filter for task status (default: all)"
+      }
+    }
+  }
+}
+```
+
+### get_current_user Tool
+```json
+{
+  "name": "get_current_user",
+  "description": "Returns the current user's email and ID from authentication",
+  "parameters": {
+    "type": "object",
+    "properties": {}
+  }
+}
+```
+
+## Error Response Format
+
+All error responses follow this format:
+
+```json
+{
+  "error": {
+    "code": "string",
+    "message": "string",
+    "details": "object (optional)"
+  }
+}
+```
+
+### Common Error Codes
+- `AUTHENTICATION_FAILED`: Invalid or missing authentication token
+- `FORBIDDEN_ACCESS`: Attempting to access unauthorized resources
+- `VALIDATION_ERROR`: Request parameters failed validation
+- `RESOURCE_NOT_FOUND`: Requested resource does not exist
+- `INTERNAL_ERROR`: Unexpected server error occurred
+- `TOOL_EXECUTION_ERROR`: Error occurred while executing a tool
+- `AI_SERVICE_ERROR`: Error communicating with the AI service

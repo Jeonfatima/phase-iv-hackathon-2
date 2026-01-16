@@ -17,7 +17,7 @@ app = FastAPI(title="Todo API", version="0.1.0")
 # ✅ CORS (correct)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://todoappphase2-beryl.vercel.app"],
+    allow_origins=["http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
