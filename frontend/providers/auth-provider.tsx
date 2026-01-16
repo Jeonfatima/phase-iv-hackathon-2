@@ -27,6 +27,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (result.user && result.token) {
       setUser({ id: Number(result.user.id), email: result.user.email });
       setToken(result.token); // store JWT token
+      // Also store in localStorage immediately
+      localStorage.setItem('auth-token', result.token);
     }
     setIsLoading(false);
     return result;
@@ -44,12 +46,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await authClient.signOut();
     setUser(null);
     setToken(null);
+    // Also remove from localStorage
+    localStorage.removeItem('auth-token');
+    localStorage.removeItem('user');
     setIsLoading(false);
   };
 
   // Optional: persist token in localStorage
   useEffect(() => {
-    const savedToken = localStorage.getItem('jwt_token');
+    const savedToken = localStorage.getItem('auth-token');
     const savedUser = localStorage.getItem('user');
     if (savedToken && savedUser) {
       setToken(savedToken);
@@ -59,10 +64,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (token && user) {
-      localStorage.setItem('jwt_token', token);
+      localStorage.setItem('auth-token', token);
       localStorage.setItem('user', JSON.stringify(user));
     } else {
-      localStorage.removeItem('jwt_token');
+      localStorage.removeItem('auth-token');
       localStorage.removeItem('user');
     }
   }, [token, user]);

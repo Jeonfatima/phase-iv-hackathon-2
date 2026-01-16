@@ -23,8 +23,8 @@ class TaskUpdate(SQLModel):
 class Task(TaskBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     user_id: int  # Foreign key to user
-    created_at: datetime = Field(default_factory=datetime.now)
-    updated_at: datetime = Field(default_factory=datetime.now)
+    created_at: datetime = Field(default=None)
+    updated_at: datetime = Field(default=None)
 
 
 __all__ = ["Task", "TaskBase", "TaskCreate", "TaskUpdate"]

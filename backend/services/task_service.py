@@ -2,7 +2,7 @@ from typing import List, Optional
 from sqlmodel import Session, select
 from models.task import Task, TaskBase, TaskCreate, TaskUpdate
 from models.user import User
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 
 
 class TaskService:
@@ -16,8 +16,8 @@ class TaskService:
             description=task_data.description,
             completed=task_data.completed,
             user_id=user_id,
-            created_at=datetime.now(UTC),
-            updated_at=datetime.now(UTC)
+            created_at=datetime.now(timezone.utc),
+            updated_at=datetime.now(timezone.utc)
         )
         session.add(task)
         session.commit()
@@ -53,7 +53,7 @@ class TaskService:
             for field, value in task_data.model_dump(exclude_unset=True).items():
                 if value is not None:
                     setattr(task, field, value)
-            task.updated_at = datetime.now(UTC)  # update timestamp
+            task.updated_at = datetime.now(timezone.utc)  # update timestamp
             session.add(task)
             session.commit()
             session.refresh(task)
@@ -79,7 +79,7 @@ class TaskService:
         task = TaskService.get_task_by_id(session, user_id, task_id)
         if task:
             task.completed = completed
-            task.updated_at = datetime.now(UTC)
+            task.updated_at = datetime.now(timezone.utc)
             session.add(task)
             session.commit()
             session.refresh(task)

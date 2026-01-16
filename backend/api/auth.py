@@ -10,7 +10,7 @@ from pydantic import BaseModel
 import hashlib
 import secrets
 import jwt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from core.config import settings
 
 router = APIRouter()
@@ -46,15 +46,14 @@ def register_user(user_data: UserCreate, session: Session = Depends(get_session)
     hashed_password_hex = hashed_password.hex()
 
     # Create new user
-    from datetime import datetime
     # Extract username from email (before @ symbol) to avoid NOT NULL constraint
     username = user_data.email.split('@')[0]
     db_user = User(
         email=user_data.email,
         username=username,
         hashed_password=f"{hashed_password_hex}:{salt}",
-        created_at=datetime.utcnow(),
-        updated_at=datetime.utcnow()
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc)
     )
 
     session.add(db_user)
@@ -72,7 +71,7 @@ def register_user(user_data: UserCreate, session: Session = Depends(get_session)
     token_data = {
         "userId": str(db_user.id),  # Match the format expected by task endpoints
         "email": db_user.email,
-        "exp": datetime.utcnow() + timedelta(hours=24)  # Token expires in 24 hours
+        "exp": datetime.now(timezone.utc) + timedelta(hours=24)  # Token expires in 24 hours
     }
     token = jwt.encode(token_data, settings.BETTER_AUTH_SECRET, algorithm="HS256")
 
@@ -119,7 +118,7 @@ def login_user(login_data: UserLogin, session: Session = Depends(get_session)):
     token_data = {
         "userId": str(db_user.id),  # Match the format expected by task endpoints
         "email": db_user.email,
-        "exp": datetime.utcnow() + timedelta(hours=24)  # Token expires in 24 hours
+        "exp": datetime.now(timezone.utc) + timedelta(hours=24)  # Token expires in 24 hours
     }
     token = jwt.encode(token_data, settings.BETTER_AUTH_SECRET, algorithm="HS256")
 

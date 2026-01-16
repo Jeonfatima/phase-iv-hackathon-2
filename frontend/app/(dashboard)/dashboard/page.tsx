@@ -1,17 +1,29 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { TaskList } from '@/components/tasks/task-list';
 import { TaskForm } from '@/components/tasks/task-form';
 import { useTasks } from '@/hooks/use-tasks';
 import { useAuth } from '@/providers/auth-provider';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
+import ChatBotButton from '@/components/ChatBotButton';
+import ChatPanel from '@/components/ChatPanel';
+import useChat from '@/hooks/useChat';
 
 export default function DashboardPage() {
   const { tasks: filteredTasks, createTask, loading, error, setFilter, filter } = useTasks();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const router = useRouter();
+  const [isChatOpen, setIsChatOpen] = useState(false);
+
+  // Only initialize chat functionality when user is authenticated
+  const userId = user?.id?.toString() || '';
+  const isAuthenticated = !!user;
+
+  // Initialize chat hook only when user is authenticated
+  const chatHook = useChat(userId);
+  const { messages, sendMessage, isLoading: isChatLoading, error: chatError } = chatHook;
 
   const handleCreateTask = async (title: string, description: string) => {
     await createTask(title, description);
@@ -20,6 +32,18 @@ export default function DashboardPage() {
   const handleSignOut = async () => {
     await logout();
     router.push('/login');
+  };
+
+  const toggleChat = () => {
+    setIsChatOpen(!isChatOpen);
+  };
+
+  const handleSendChatMessage = (message: string) => {
+    if (userId) {
+      sendMessage(message);
+    } else {
+      console.error('Cannot send message: user not authenticated');
+    }
   };
 
   return (
@@ -99,6 +123,16 @@ export default function DashboardPage() {
           Made by Fatima Salman 464666
         </footer>
       </div>
+
+      {/* Chatbot Components */}
+      <ChatBotButton onClick={toggleChat} />
+      <ChatPanel
+        isOpen={isChatOpen}
+        onClose={toggleChat}
+        messages={messages}
+        onSendMessage={handleSendChatMessage}
+        isLoading={isChatLoading}
+      />
     </>
   );
 }

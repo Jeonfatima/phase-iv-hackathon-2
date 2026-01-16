@@ -10,15 +10,18 @@ A modern, multi-user todo application with authentication and persistent storage
 - **Responsive design** - Works on desktop, tablet, and mobile devices
 - **Real-time updates** - Changes reflect immediately in the UI
 - **Persistent storage** - Todos stored securely in PostgreSQL database
+- **AI-Powered Chatbot** - Natural language task management with Cohere AI integration
+- **Glassmorphic UI** - Premium chat interface with smooth animations and modern design
 
 ## 🛠 Tech Stack
 
-- **Frontend:** Next.js 16+ (App Router), TypeScript, Tailwind CSS
-- **Backend:** Python FastAPI
+- **Frontend:** Next.js 16+ (App Router), TypeScript, Tailwind CSS, Framer Motion
+- **Backend:** Python FastAPI, Cohere AI, SQLModel
 - **Database:** Neon Serverless PostgreSQL
 - **ORM:** SQLModel
 - **Authentication:** Better Auth (JWT)
 - **Styling:** Tailwind CSS
+- **AI Integration:** Cohere command-r-plus model with tool calling
 
 ## 📁 Project Structure
 
@@ -35,7 +38,17 @@ A modern, multi-user todo application with authentication and persistent storage
 │   │   ├── engine.py         # Database engine
 │   │   └── session.py        # Session management
 │   ├── models/               # SQLModel database models
-│   │   └── task.py           # Task model
+│   │   ├── task.py           # Task model
+│   │   └── conversation.py   # Conversation and Message models
+│   ├── services/             # Business logic services
+│   │   ├── task_service.py   # Task operations
+│   │   ├── mcp_tools.py      # AI tools for task operations
+│   │   ├── ai_service.py     # Cohere AI integration
+│   │   └── chat_service.py   # Chat conversation management
+│   ├── api/                  # API route definitions
+│   │   ├── auth.py           # Authentication endpoints
+│   │   ├── task_router.py    # Task management endpoints
+│   │   └── chat.py           # AI Chatbot endpoints
 │   ├── core/                 # Core configuration
 │   │   └── config.py         # Configuration settings
 │   └── README.md             # Backend setup instructions
@@ -57,6 +70,15 @@ A modern, multi-user todo application with authentication and persistent storage
 
 - Python 3.9+ for backend
 - PostgreSQL (or Neon Serverless account)
+- Cohere API Key for AI features
+
+### AI Chatbot Setup
+
+1. Get your Cohere API key from [Cohere Console](https://dashboard.cohere.ai/api-keys)
+2. Add it to your backend `.env` file:
+   ```env
+   COHERE_API_KEY=your-cohere-api-key-here
+   ```
 
 ### Setup Instructions
 
@@ -141,6 +163,11 @@ The application integrates with Better Auth for secure JWT-based authentication 
 - `DELETE /api/{user_id}/tasks/{task_id}` - Delete task
 - `PATCH /api/{user_id}/tasks/{task_id}/complete` - Update completion status
 
+### AI Chatbot Endpoints with Authorization
+- `POST /api/{user_id}/chat` - Send message to AI assistant and receive response
+- `GET /api/{user_id}/conversations` - Get all conversations for user
+- `GET /api/{user_id}/conversations/{conversation_id}/messages` - Get messages in conversation
+
 ### Authorization Flow
 1. User authenticates through Better Auth frontend and receives JWT token
 2. Frontend includes JWT token in Authorization header: `Bearer <token>`
@@ -153,6 +180,18 @@ The application integrates with Better Auth for secure JWT-based authentication 
 - Backend does NOT handle user registration/login/passwords
 - Authentication is managed entirely by Better Auth
 - Backend only verifies tokens and enforces authorization
+
+## 🤖 AI Chatbot Usage
+
+The AI Chatbot enables natural language task management. Simply click the chat button in the bottom-right corner and speak to your todo list conversationally:
+
+- "Add a task to buy groceries" - Creates a new task
+- "Show me my pending tasks" - Lists all incomplete tasks
+- "Mark task 3 as complete" - Updates task completion status
+- "Delete the meeting task" - Removes a specific task
+- "Who am I?" - Returns your user information
+
+The AI understands complex requests and can chain multiple operations together.
 
 ## 🧪 Running Tests
 
