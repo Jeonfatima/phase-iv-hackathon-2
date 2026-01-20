@@ -47,24 +47,34 @@ const ChatPanel = ({
           exit={{ opacity: 0 }}
         >
           <div
-            className="fixed inset-0 bg-black/30 backdrop-blur-sm"
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm"
             onClick={onClose}
           ></div>
 
           <motion.div
-            className="relative w-full h-[60vh] max-w-2xl mx-2 mb-2 bg-white/10 backdrop-blur-lg rounded-2xl border border-white/30 shadow-2xl overflow-hidden flex flex-col"
-            initial={{ y: '100%', x: 0 }}
-            animate={{ y: 0, x: 0 }}
-            exit={{ y: '100%', x: 0 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="relative w-full max-w-md h-[70vh] mx-2 mb-2 bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden flex flex-col"
+            initial={{ y: '100%', x: 0, scale: 0.95 }}
+            animate={{ y: 0, x: 0, scale: 1 }}
+            exit={{ y: '100%', x: 0, scale: 0.95 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200, duration: 0.3 }}
           >
             {/* Header */}
-            <div className="bg-gradient-to-r from-emerald-500/20 to-teal-500/20 p-4 border-b border-white/20">
+            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4">
               <div className="flex justify-between items-center">
-                <h2 className="text-lg font-semibold text-white">AI Todo Assistant</h2>
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-semibold text-white">AI Assistant</h2>
+                    <p className="text-xs text-indigo-200">Online • Ready to help</p>
+                  </div>
+                </div>
                 <button
                   onClick={onClose}
-                  className="text-white hover:text-gray-300 transition-colors"
+                  className="text-white/80 hover:text-white transition-colors"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -85,27 +95,31 @@ const ChatPanel = ({
             </div>
 
             {/* Messages Container */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50">
               {messages.length === 0 && !isLoading && (
-                <div className="flex flex-col items-center justify-center h-full text-center text-gray-400">
+                <div className="flex flex-col items-center justify-center h-full text-center text-slate-500">
                   <div className="mb-4">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-12 w-12 mx-auto"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={1.5}
-                        d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
-                      />
-                    </svg>
+                    <div className="w-16 h-16 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-full flex items-center justify-center mx-auto">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-8 w-8 text-indigo-600"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={1.5}
+                          d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+                        />
+                      </svg>
+                    </div>
                   </div>
-                  <p>Hello! I'm your AI Todo Assistant.</p>
-                  <p className="mt-2">Ask me to add, delete, or manage your tasks.</p>
+                  <h3 className="text-lg font-medium text-slate-800 mb-2">How can I help you?</h3>
+                  <p className="text-slate-600 max-w-xs">
+                    I can help you manage your tasks. Try saying "Add a task to buy groceries" or "Show my tasks".
+                  </p>
                 </div>
               )}
 
@@ -120,11 +134,11 @@ const ChatPanel = ({
 
               {isLoading && (
                 <div className="flex justify-start mb-4">
-                  <div className="bg-white/20 backdrop-blur-lg border border-white/30 text-gray-800 rounded-2xl rounded-bl-none p-4 shadow-md">
+                  <div className="bg-slate-100 rounded-2xl rounded-bl-none p-4 shadow-sm">
                     <div className="flex space-x-2">
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-75"></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-150"></div>
+                      <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce delay-75"></div>
+                      <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce delay-150"></div>
                     </div>
                   </div>
                 </div>
@@ -133,19 +147,19 @@ const ChatPanel = ({
             </div>
 
             {/* Input Area */}
-            <div className="border-t border-white/20 p-4 bg-white/5">
+            <div className="border-t border-slate-200 p-4 bg-white">
               <form onSubmit={handleSubmit} className="flex gap-2">
                 <input
                   type="text"
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
-                  placeholder="Type your message..."
-                  className="flex-1 bg-white/10 backdrop-blur-md border border-white/30 rounded-full px-4 py-3 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                  placeholder="Message AI Assistant..."
+                  className="flex-1 bg-slate-100 rounded-xl px-4 py-3 text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white focus:border-indigo-500 transition-all"
                   disabled={isLoading}
                 />
                 <button
                   type="submit"
-                  className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-full p-3 hover:opacity-90 transition-opacity disabled:opacity-50"
+                  className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl px-4 py-3 hover:from-indigo-700 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
                   disabled={isLoading || !inputValue.trim()}
                 >
                   <svg

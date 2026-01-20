@@ -6,17 +6,17 @@ const ChatBotButton = ({ onClick }: { onClick: () => void }) => {
 
   return (
     <motion.button
-      className={`fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 shadow-lg flex items-center justify-center text-white cursor-pointer ${
+      className={`fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 shadow-lg flex items-center justify-center text-white cursor-pointer hover:shadow-xl transition-shadow ${
         isHovered ? 'shadow-xl' : ''
       }`}
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      whileHover={{ scale: 1.1, rotate: 5 }}
+      whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
-      initial={{ scale: 0, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      transition={{ duration: 0.3 }}
+      initial={{ scale: 0, opacity: 0, y: 20 }}
+      animate={{ scale: 1, opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -29,13 +29,18 @@ const ChatBotButton = ({ onClick }: { onClick: () => void }) => {
           strokeLinecap="round"
           strokeLinejoin="round"
           strokeWidth={2}
-          d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+          d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
         />
       </svg>
       {isHovered && (
-        <span className="absolute -top-8 px-2 py-1 bg-gray-800 text-white text-xs rounded-md">
-          Chat with AI
-        </span>
+        <motion.span
+          className="absolute -top-10 px-3 py-1.5 bg-slate-800 text-white text-xs rounded-lg shadow-lg"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 10 }}
+        >
+          AI Assistant
+        </motion.span>
       )}
     </motion.button>
   );

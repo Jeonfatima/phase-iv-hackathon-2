@@ -97,47 +97,59 @@ class AIService:
     def _interpret_message_manually(user_message: str) -> Dict[str, Any]:
         """
         Manually interpret common task-related messages when Cohere is unavailable
+        FIXED VERSION: Corrected the order and added missing patterns
         """
         user_lower = user_message.lower().strip()
 
-        # Interpret common commands
-        if any(word in user_lower for word in ["list", "show", "my", "tasks", "todo"]):
-            # This is likely a request to list tasks
-            return {
-                "response": "Let me get your tasks for you...",
-                "tool_calls": [{
-                    "name": "list_tasks",
-                    "arguments": {}
-                }],
-                "success": True
-            }
-        elif any(word in user_lower for word in ["add", "create", "new", "task"]):
-            # This is likely a request to add a task
-            # Extract task title from the message
+        # Check for specific commands FIRST, before general terms
+
+        # UPDATE TASKS - Check for update/modify/change commands first
+        if any(word in user_lower for word in ["update", "modify", "change", "edit"]):
+            # This is likely a request to update a task
+            # Look for task ID and what to update
             import re
-            # Look for patterns like "add task to [title]" or "add a task [title]"
-            patterns = [
-                r'add.*?task.*?to\s+(.+)',
-                r'add.*?task\s+(.+)',
-                r'create.*?task.*?to\s+(.+)',
-                r'create.*?task\s+(.+)',
-            ]
+            task_id_match = re.search(r'task\s+(\d+)|(\d+)\s+task', user_message, re.IGNORECASE)
 
-            title = "new task"  # default
-            for pattern in patterns:
-                match = re.search(pattern, user_message, re.IGNORECASE)
-                if match:
-                    title = match.group(1).strip()
-                    break
+            # Extract title and description if mentioned - improved regex
+            # Look for patterns like "update task 1 title to NEW_TITLE" or "update task 1 to NEW_TITLE"
+            title_match = None
+            # First try to match "title to ..." or "description to ..."
+            title_to_match = re.search(r'(?:title|name)\s+to\s+(.+?)(?:\s+(?:and|description|desc)\s+|\s*$)', user_message, re.IGNORECASE)
+            if not title_to_match:
+                # Try "update task X to ..." pattern
+                title_to_match = re.search(r'to\s+(.+?)(?:\s+(?:and|description|desc)\s+|\s*$)', user_message, re.IGNORECASE)
 
-            return {
-                "response": f"Adding task: {title}",
-                "tool_calls": [{
-                    "name": "add_task",
-                    "arguments": {"title": title}
-                }],
-                "success": True
-            }
+            # Look for description pattern
+            desc_match = re.search(r'(?:description|desc|details?)\s+(?:to\s+)?(.+?)(?:\s+(?:and|title|name)\s+|\s*$)', user_message, re.IGNORECASE)
+
+            if task_id_match:
+                task_id_str = task_id_match.group(1) or task_id_match.group(2)
+                if task_id_str:
+                    task_id = int(task_id_str)
+
+                    update_args = {"task_id": task_id}
+
+                    if title_to_match:
+                        title = title_to_match.group(1).strip()
+                        if title and title.lower() != 'to':  # Avoid catching just the word 'to'
+                            update_args["title"] = title
+
+                    if desc_match:
+                        desc = desc_match.group(1).strip()
+                        if desc:
+                            update_args["description"] = desc
+
+                    if len(update_args) > 1:  # Has task_id plus at least one other field
+                        return {
+                            "response": f"Updating task {task_id}",
+                            "tool_calls": [{
+                                "name": "update_task",
+                                "arguments": update_args
+                            }],
+                            "success": True
+                        }
+
+        # DELETE TASKS - Check for delete/remove commands before general terms
         elif any(word in user_lower for word in ["delete", "remove"]):
             # This is likely a request to delete a task
             import re
@@ -168,6 +180,8 @@ class AIService:
                     }],
                     "success": True
                 }
+
+        # COMPLETE/FINISH TASKS
         elif any(word in user_lower for word in ["complete", "done", "finish"]):
             # This is likely a request to complete a task
             import re
@@ -198,6 +212,55 @@ class AIService:
                     }],
                     "success": True
                 }
+
+        # LIST TASKS
+        elif any(word in user_lower for word in ["list", "show", "my", "tasks", "todo"]):
+            # This is likely a request to list tasks
+            # Check if there are filters like "pending", "completed", "all"
+            if any(word in user_lower for word in ["pending", "incomplete", "not done"]):
+                filter_status = "pending"
+            elif any(word in user_lower for word in ["completed", "done", "finished"]):
+                filter_status = "completed"
+            else:
+                filter_status = "all"  # default
+
+            return {
+                "response": "Let me get your tasks for you...",
+                "tool_calls": [{
+                    "name": "list_tasks",
+                    "arguments": {"filter_status": filter_status}
+                }],
+                "success": True
+            }
+
+        # ADD TASKS - Check for add commands LAST, after more specific ones
+        elif any(word in user_lower for word in ["add", "create", "new"]):
+            # This is likely a request to add a task
+            import re
+            # Extract task title from the message
+            # Look for patterns like "add task to [title]" or "add a task [title]"
+            patterns = [
+                r'add.*?task.*?to\s+(.+)',
+                r'add.*?task\s+(.+)',
+                r'create.*?task.*?to\s+(.+)',
+                r'create.*?task\s+(.+)',
+            ]
+
+            title = "new task"  # default
+            for pattern in patterns:
+                match = re.search(pattern, user_message, re.IGNORECASE)
+                if match:
+                    title = match.group(1).strip()
+                    break
+
+            return {
+                "response": f"Adding task: {title}",
+                "tool_calls": [{
+                    "name": "add_task",
+                    "arguments": {"title": title}
+                }],
+                "success": True
+            }
 
         # If none of the common patterns match, return a generic response
         return {
@@ -384,26 +447,69 @@ class AIService:
         all_tool_calls = []
         current_response = result["response"]
 
-        # Loop while there are tool calls to execute
-        iteration_count = 0
-        max_iterations = 5  # Prevent infinite loops
-
-        while result["tool_calls"] and iteration_count < max_iterations:
-            iteration_count += 1
-
+        # Check if there are tool calls to execute
+        if result["tool_calls"]:
             # Execute the tool calls
             tool_results = AIService.execute_tool_calls(result["tool_calls"], user_id)
 
             # Add to the list of all tool calls executed
             all_tool_calls.extend(tool_results)
 
-            # Prepare the next message with tool results
-            # In a real implementation, you'd feed these results back to Cohere
-            # For now, we'll just return the results
+            # Build the final response based on tool results
+            final_response_parts = []
 
-            # For this implementation, we'll break after the first round of tool calls
-            # A full implementation would feed results back to Cohere for further processing
-            break
+            for tool_result in tool_results:
+                name = tool_result["name"]
+                result_data = tool_result["result"]
+
+                # Format the response based on the tool type and result
+                if name == "list_tasks":
+                    if result_data.get("success"):
+                        tasks = result_data.get("tasks", [])
+                        if tasks:
+                            task_list = "\n".join([f"- {task['id']}. {task['title']} ({'✓' if task['completed'] else '○'})" for task in tasks])
+                            final_response_parts.append(f"Here are your tasks:\n{task_list}")
+                        else:
+                            final_response_parts.append("You don't have any tasks right now.")
+                    else:
+                        final_response_parts.append("I couldn't retrieve your tasks. Please try again.")
+
+                elif name == "add_task":
+                    if result_data.get("success"):
+                        task = result_data.get("task", {})
+                        final_response_parts.append(f"I've added the task: '{task.get('title', 'Untitled')}'")
+                    else:
+                        final_response_parts.append("I couldn't add the task. Please try again.")
+
+                elif name == "delete_task":
+                    if result_data.get("success"):
+                        final_response_parts.append("Task deleted successfully!")
+                    else:
+                        final_response_parts.append("I couldn't delete the task. Please check the task ID and try again.")
+
+                elif name == "update_task":
+                    if result_data.get("success"):
+                        final_response_parts.append("Task updated successfully!")
+                    else:
+                        final_response_parts.append("I couldn't update the task. Please check the task ID and try again.")
+
+                elif name == "complete_task":
+                    if result_data.get("success"):
+                        completed = result_data.get("task", {}).get("completed", False)
+                        status = "completed" if completed else "marked as not completed"
+                        final_response_parts.append(f"Task {status} successfully!")
+                    else:
+                        final_response_parts.append("I couldn't update the task status. Please check the task ID and try again.")
+
+                elif name == "get_current_user":
+                    if result_data.get("success"):
+                        user_email = result_data.get("user", {}).get("email", "Unknown")
+                        final_response_parts.append(f"You are logged in as: {user_email}")
+                    else:
+                        final_response_parts.append("I couldn't get your user information.")
+
+            # Combine all parts into the final response
+            current_response = " ".join(final_response_parts)
 
         return {
             "response": current_response,

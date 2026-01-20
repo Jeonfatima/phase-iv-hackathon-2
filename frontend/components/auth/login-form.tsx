@@ -28,19 +28,17 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
   return (
     <div>
-      <div className="text-center mb-6">
-        <h2 className="text-xl font-bold text-gray-900">Sign in to your account</h2>
-      </div>
+      
 
       {error && (
-        <div className="mb-4 p-3 bg-[#FFD8DF] text-[#FF5C6C] rounded-xl text-sm">
+        <div className="mb-6 p-4 bg-red-900/30 text-red-300 rounded-xl text-sm border border-red-700/50">
           {typeof error === 'string' ? error : JSON.stringify(error)}
         </div>
       )}
 
-      <form className="space-y-6" onSubmit={handleSubmit}>
+      <form className="space-y-5" onSubmit={handleSubmit}>
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-2">
             Email address
           </label>
           <div className="mt-1">
@@ -52,13 +50,14 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               required
               value={email}
               onChange={(e) => onEmailChange(e.target.value)}
-              className="w-full p-3 rounded-xl border-gray-300 focus:border-[#A8DF8E] focus:ring-[#A8DF8E] sm:text-sm text-gray-900"
+              className="w-full px-4 py-3 rounded-lg border-slate-600/50 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none transition-colors text-slate-100 bg-slate-800/50"
+              placeholder="Enter your email"
             />
           </div>
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="password" className="block text-sm font-medium text-slate-300 mb-2">
             Password
           </label>
           <div className="mt-1">
@@ -70,26 +69,47 @@ export const LoginForm: React.FC<LoginFormProps> = ({
               required
               value={password}
               onChange={(e) => onPasswordChange(e.target.value)}
-              className="w-full p-3 rounded-xl border-gray-300 focus:border-[#A8DF8E] focus:ring-[#A8DF8E] sm:text-sm text-gray-900"
+              className="w-full px-4 py-3 rounded-lg border-slate-600/50 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none transition-colors text-slate-100 bg-slate-800/50"
+              placeholder="Enter your password"
             />
           </div>
+        </div>
+
+        <div className="flex items-center justify-between text-sm">
+          <label className="flex items-center text-slate-400">
+            <input
+              type="checkbox"
+              className="rounded border-slate-600 bg-slate-700 text-indigo-500 focus:ring-indigo-500 mr-2"
+            />
+            Remember me
+          </label>
+          <a href="#" className="font-medium text-indigo-400 hover:text-indigo-300">
+            Forgot password?
+          </a>
         </div>
 
         <div>
           <Button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#A8DF8E] hover:bg-[#97ce7e] text-white rounded-xl shadow-sm hover:scale-[1.02] transition-transform disabled:opacity-50"
+            className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-lg shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 h-12 font-semibold"
           >
-            {loading ? 'Signing in...' : 'Sign in'}
+            {loading ? (
+              <div className="flex items-center justify-center">
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
+                Signing in...
+              </div>
+            ) : (
+              'Sign in'
+            )}
           </Button>
         </div>
       </form>
 
-      <div className="mt-6 text-center text-sm text-gray-600">
+      <div className="mt-8 text-center text-sm text-slate-400">
         <p>
           Don't have an account?{' '}
-          <a href="/register" className="font-medium text-[#A8DF8E] hover:text-[#8bc47a]">
+          <a href="/register" className="font-semibold text-indigo-400 hover:text-indigo-300 transition-colors">
             Register here
           </a>
         </p>
