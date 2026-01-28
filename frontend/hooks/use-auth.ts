@@ -33,7 +33,7 @@ export const useAuthState = () => {
 
     try {
       const result = await login(loginForm.email, loginForm.password);
-      if (!result.success) {
+      if (result.error) {
         setLoginForm(prev => ({
           ...prev,
           error: result.error?.message || 'Login failed',
@@ -74,7 +74,7 @@ export const useAuthState = () => {
 
     try {
       const result = await register(registerForm.email, registerForm.password);
-      if (!result.success) {
+      if (result.error) {
         setRegisterForm(prev => ({
           ...prev,
           error: result.error?.message || 'Registration failed',

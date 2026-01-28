@@ -1,0 +1,42 @@
+# Default values for frontend
+replicaCount: 1
+
+image:
+  repository: todo-frontend
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 3000
+
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: todo.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+env:
+  - name: NEXT_PUBLIC_API_BASE_URL
+    value: "http://todo-app-backend.todo-chatbot.svc.cluster.local:8000"
+  - name: NEXT_PUBLIC_BETTER_AUTH_URL
+    value: "http://todo-app-backend.todo-chatbot.svc.cluster.local:8000"

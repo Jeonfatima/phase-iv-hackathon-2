@@ -1,201 +1,177 @@
-<!--
-Sync Impact Report:
-- Version change: 1.0.0 → 3.0.0
-- Modified principles: All principles updated for Phase III
-- Added sections: Chatbot Functionality, MCP Tools, Cohere API sections
-- Removed sections: Phase I specific requirements
+<!-- Sync Impact Report:
+- Version change: 3.0.0 → 4.0.0
+- Modified principles: Updated for Phase IV cloud-native deployment focus
+- Added sections: Containerization, Helm Charts, Minikube Cluster, AI DevOps Tools, Security & Hardening
+- Removed sections: Phase III specific requirements
 - Templates requiring updates: ✅ .specify/templates/plan-template.md, ✅ .specify/templates/spec-template.md, ✅ .specify/templates/tasks-template.md
 - Follow-up TODOs: None
 -->
 
-# Todo Chatbot Integration Constitution - Phase III: Full-Stack Web Application with AI
+# Local Kubernetes Deployment Constitution - Phase IV: Cloud-Native Todo Chatbot
 
 ## Project Overview
 
-The Evolution of Todo continues from Phase I (Console Application) and Phase II (Full-Stack Web) to Phase III, integrating a powerful AI-powered chatbot into the existing full-stack backend (FastAPI + Neon DB + Better Auth). The objective is to provide natural language task management with full CRUD functionality, enabling users to manage tasks through conversational interfaces while maintaining all existing features.
+From AI Chatbot to local cloud-native deployment, the objective is to achieve production-grade local excellence. The Evolution of Todo continues from Phase III (Full-Stack Web Application with AI Chatbot) to Phase IV, transforming the existing application into a fully containerized, cloud-native deployment using Kubernetes. The objective is to provide a production-grade local deployment on Minikube with containerized frontend (Next.js) and backend (FastAPI + Cohere chatbot) services, ensuring enterprise-level observability, resilience, and operational excellence through AI-powered DevOps tools.
 
 ## Core Requirements
 
-### I. Conversational Interface for Task Management
-The chatbot must support all five core task operations through natural language: Add Task, Delete Task, Update Task, List Tasks, and Mark Task Complete/Incomplete. The interface must handle complex queries that chain multiple operations (e.g., "Add weekly meeting and list pending tasks").
+### I. Containerization and Orchestration
+Both frontend (Next.js) and backend (FastAPI + Cohere chatbot) services must be containerized with optimized multi-stage Dockerfiles, deployed as Kubernetes deployments with replica sets, resource limits/requests, and health probes to ensure reliable operation in the cluster.
 
-### II. User Identity and Session Queries
-The chatbot must respond to user identity queries such as "Who am I?" with the logged-in user's email address (e.g., "Logged in as example@email.com"), extracted securely from the authenticated session.
+### II. AI-Generated Infrastructure as Code
+All infrastructure must be AI-generated using agentic tools with production-ready Helm charts that include all necessary components: Deployments, Services, Ingress controllers, ConfigMaps, and Secrets. No manual YAML or kubectl commands are permitted - everything must be AI-generated only.
 
-### III. Stateless Architecture
-The system must be stateless with no server-side session storage. All conversation state must be persisted in the database using Conversation and Message models to maintain continuity across requests.
+### III. Minikube Cluster Deployment
+The application must deploy successfully on Minikube with ingress-enabled access and port-forward fallback, utilizing the docker driver with ingress addon enabled to provide local access to both frontend and backend services.
 
-### IV. Cohere API Integration
-Replace OpenAI Agents SDK with Cohere's API for all AI logic, adapting agent-like behavior to use Cohere's chat/completions endpoint for tool calling and reasoning. The system must structure prompts to reason step-by-step and output tool invocation JSON.
+### IV. AIOps Validation and Resilience
+The system must leverage kubectl-ai and kagent for intelligent creation, troubleshooting, and scaling operations. Full observability (logs, events, pod status) and resilience (self-healing, restarts) must be ensured through proper monitoring and alerting configurations.
 
-## Chatbot Functionality & Natural Language Handling
+## Containerization Strategy
 
-### Natural Language Processing
-The chatbot must interpret natural language commands and map them to specific MCP tools. Examples include:
-- "Add a task called 'Buy groceries'" → add_task tool with title "Buy groceries"
-- "Delete task number 5" → delete_task tool with id 5
-- "Mark task 3 as complete" → update_task tool with completed true
-- "Show me my tasks" → list_tasks tool
+### Multi-Stage Dockerfiles
+Frontend and backend services must use optimized multi-stage Dockerfiles that:
+- Implement security best practices (non-root user, minimal base images)
+- Apply Gordon-first strategy for container security scanning
+- Include proper build optimizations and caching layers
+- Follow Docker security guidelines (no secrets in images, proper layer ordering)
 
-### Confirmation and Error Handling
-The system must provide clear confirmations for all operations (e.g., "Task 'Buy groceries' added successfully") and graceful error handling with informative messages when operations fail.
+### Gordon Security Integration
+All Docker builds must utilize Gordon Beta for security scanning and compliance verification. Container images must pass security scans before deployment to ensure no vulnerabilities exist in the base images or dependencies.
 
-### Multi-Turn Conversations
-The chatbot must maintain context across multiple exchanges, allowing users to reference previous statements or tasks without repeating information.
+### Image Optimization
+Docker images must be optimized for size and security with:
+- Minimal base images (alpine or distroless where possible)
+- Multi-stage builds to separate build and runtime environments
+- Proper cleanup of build artifacts and package managers
+- Non-root user execution within containers
 
-## Authentication & Security
+## Helm Charts Architecture
 
-### JWT-Based User Isolation
-All endpoints must validate JWT tokens to extract user_id and ensure proper user isolation. Each user's tasks and conversations must be completely isolated from other users.
+### Umbrella Chart Structure
+The system must implement an umbrella Helm chart with subcharts for:
+- Frontend service (Next.js application)
+- Backend service (FastAPI + Cohere API)
+- Database (PostgreSQL/Neon connector)
+- Ingress controller
+- Monitoring and observability components
 
-### Secure Session Management
-User email information must be securely extracted from authenticated sessions without exposing sensitive data. The system must validate user permissions before performing any task operations.
+### Values Configuration
+Values.yaml files must be fully configurable with defaults for local development and production-like settings, supporting environment-specific overrides and secret management through Kubernetes Secrets.
 
-### Conversation Privacy
-Each user's conversation history must be accessible only to that user, with proper authentication checks on all conversation-related endpoints.
+### Template Requirements
+Helm templates must include:
+- Deployments with replica sets (minimum 1, scalable to 3+)
+- Services with proper selectors and ports
+- Ingress resources with TLS termination (where applicable)
+- Health probes (liveness and readiness)
+- Resource limits and requests (CPU/memory)
+- Horizontal Pod Autoscaler configurations
+- Proper security contexts and RBAC where needed
 
-## Non-Functional Requirements
+## Minikube Cluster Operations
 
-### Performance and Scalability
-The system must handle concurrent users efficiently with asynchronous operations where possible. Response times should remain under 2 seconds for typical requests.
+### Cluster Setup
+Minikube must be started with docker driver and ingress addon enabled, with proper resource allocation (4GB+ RAM, 2+ CPUs) to handle the multi-service application workload.
 
-### Error Resilience
-The system must gracefully handle network timeouts, database connection issues, and API failures from Cohere with appropriate fallback mechanisms and user notifications.
+### Access Patterns
+The system must support both ingress-based access and port-forward fallback for service connectivity, with proper host alias configuration for local development access.
 
-### Code Quality
-All code must follow clean architecture principles with clear separation of concerns between authentication, business logic, database operations, and AI integration.
+### Tunneling and Networking
+Network policies and service discovery must work properly within the Minikube environment, with clear documentation on accessing services both internally and externally through various methods (ingress, port-forward, minikube tunnel).
 
-## Technology Stack and Tools
+## AI DevOps Tools Integration
 
-### Backend Extensions
-Extend existing Phase I stack with:
-- FastAPI for new chat endpoints
-- SQLModel for Conversation and Message models
-- Neon PostgreSQL for persistent storage
-- Better Auth for user authentication
-- Cohere API for AI reasoning and tool calling
-- Official MCP SDK for tool integration
+### Gordon Usage Examples
+Gordon must be leveraged for:
+- Container security scanning and compliance checking
+- Multi-stage Dockerfile generation and optimization
+- Automated vulnerability remediation recommendations
 
-### Frontend Integration
-Integrate ChatKit or similar component for conversational UI, maintaining consistency with existing frontend architecture.
+### kubectl-ai Prompt Patterns
+Standard prompt patterns must be established for:
+- Resource creation and configuration
+- Troubleshooting and debugging
+- Scaling operations and performance optimization
+- Monitoring and alerting setup
+
+### kagent Operations
+kagent tools must be used for:
+- Cluster health monitoring and optimization
+- Pod status and performance analysis
+- Automatic scaling and self-healing operations
+- Event correlation and incident response
+
+## Security & Hardening
+
+### Kubernetes Secrets Management
+All sensitive environment variables (BETTER_AUTH_SECRET, COHERE_API_KEY, DATABASE_URL) must be stored as Kubernetes Secrets and mounted as environment variables or volumes, with no plaintext secrets in configuration files or Docker images.
+
+### Least-Privilege Security
+Pod security contexts must be configured with minimal required privileges, following least-privilege principles for container execution and resource access.
+
+### Health Probes Enforcement
+Liveness and readiness probes must be implemented for all services to ensure application health and proper traffic routing within the cluster.
 
 ## Development Workflow
 
 ### Agentic Development Process
-Follow the spec → plan → tasks → Claude Code workflow with all development performed through Claude Code agents and Spec-Kit Plus skills. No manual coding is permitted.
+Strict adherence to constitution → specs → plans → agents/skills → validation → iteration workflow, with all infrastructure changes performed through Claude Code agents and Spec-Kit Plus skills.
 
-### Cohere API Key Management
-Use the provided COHERE_API_KEY=YOUR_COHERE_API_KEY_HERE for all AI calls, with proper environment variable management.
+### AI-Powered Operations
+All Kubernetes operations must utilize AI tools (kubectl-ai, kagent) for creation, troubleshooting, and optimization, avoiding manual kubectl commands or YAML creation.
 
-### Testing and Validation
-Implement comprehensive testing for all new functionality including authentication, conversation persistence, and AI integration.
+### Continuous Validation
+Regular validation of cluster health, security posture, and application functionality through automated testing and monitoring tools.
 
 ## Monorepo Updates
 
-### Backend Extensions
-Extend the /backend directory with:
-- New chat endpoint at /api/{user_id}/chat
-- MCP server implementation for tool exposure
-- Conversation and Message model definitions
-- Cohere API integration services
+### Directory Structure
+New directories must be added to maintain infrastructure code:
+- `docker/` - Contains multi-stage Dockerfiles for frontend and backend
+- `charts/` - Helm chart definitions with subcharts and values
+- `k8s/manifests/` - Generated manifests for CI/CD (if needed)
+- Update `.specify/config` to reflect new project structure
 
-### Database Model Extensions
-Add new models to maintain conversation state:
-- Conversation model with user_id and id fields
-- Message model with conversation_id, role, and content fields
-
-## Database Extensions
-
-### Conversation Model
-```python
-class Conversation(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    user_id: str  # Links to authenticated user
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
-```
-
-### Message Model
-```python
-class Message(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    conversation_id: int = Field(foreign_key="conversation.id")
-    role: str  # "user", "assistant", "tool"
-    content: str  # The message content
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
-```
-
-## MCP Tools Specification
-
-### 1. add_task Tool
-- **Purpose**: Add a new task to the user's task list
-- **Parameters**: { "title": "string", "description": "string" }
-- **Returns**: { "success": "boolean", "task_id": "int", "message": "string" }
-
-### 2. delete_task Tool
-- **Purpose**: Delete an existing task from the user's task list
-- **Parameters**: { "task_id": "int" }
-- **Returns**: { "success": "boolean", "message": "string" }
-
-### 3. update_task Tool
-- **Purpose**: Update an existing task's properties
-- **Parameters**: { "task_id": "int", "title": "string?", "description": "string?", "completed": "boolean?" }
-- **Returns**: { "success": "boolean", "message": "string" }
-
-### 4. list_tasks Tool
-- **Purpose**: Retrieve all tasks for the current user
-- **Parameters**: { "filter": "string?" } // "all", "pending", "completed"
-- **Returns**: { "tasks": "array", "count": "int" }
-
-### 5. get_current_user_email Tool
-- **Purpose**: Retrieve the current user's email from authenticated session
-- **Parameters**: {}
-- **Returns**: { "email": "string", "user_id": "string" }
-
-## Cohere API Adaptation
-
-### Reasoning and Tool Calling
-Structure prompts to Cohere to encourage step-by-step reasoning and JSON-formatted tool invocation. The system should parse Cohere's responses to extract tool call information and execute the appropriate MCP tools.
-
-### Multi-Turn Conversation Management
-Maintain conversation history by retrieving and storing messages in the database. Pass relevant conversation context to Cohere to maintain continuity across exchanges.
-
-### Response Formatting
-Process Cohere's responses to format them appropriately for the chat interface while preserving the natural conversational flow.
+### Documentation Updates
+All new infrastructure components must be documented with clear deployment and troubleshooting guides, including AI tool usage examples and cluster maintenance procedures.
 
 ## Guiding Principles
 
-### AI-First Design
-Prioritize AI integration as the primary interaction method while maintaining traditional API endpoints as secondary options.
+### Spec-Driven Infrastructure
+All infrastructure changes must be defined in specifications before implementation, with clear requirements and validation criteria before any code is written.
 
-### Stateless Architecture
-No server-side session state; all conversation persistence occurs in the database to ensure scalability and reliability.
+### AI-First DevOps Approach
+Prioritize AI-powered DevOps tools (kubectl-ai, kagent, Gordon) for all infrastructure operations, treating them as primary tools rather than supplementary.
 
-### Security-First Approach
-Implement robust authentication and user isolation as the highest priority, ensuring no cross-user data leakage.
+### Resilience and Observability
+Design for failure with proper health checks, logging, and monitoring to ensure applications can self-heal and remain observable under all conditions.
 
-### No Manual Coding
-All implementation must be performed through Claude Code agents and Spec-Kit Plus skills without any direct manual code changes.
+### Back to Basics
+Return to fundamental DevOps principles while leveraging modern AI tools, ensuring that automation serves to enhance rather than replace understanding.
 
-### Hackathon Transparency
-Maintain clear documentation and code structure suitable for judge evaluation of agentic AI integration quality.
+### Enterprise-Level Quality
+Maintain production-grade standards for all infrastructure components, with proper security, monitoring, and operational procedures from day one.
 
 ## Deliverables and Success Criteria
 
-### Working Chatbot
-A fully functional AI-powered chatbot that responds to natural language commands for all task operations and user identity queries.
+### Running Minikube Cluster
+Successfully deployed application on local Minikube cluster with all services accessible and functioning properly.
 
-### Repository Updates
-Complete integration into the existing monorepo structure with proper documentation and code organization.
+### AI-Generated Artifacts
+Complete set of AI-generated Dockerfiles, Helm charts, and Kubernetes configurations with no manually created YAML files.
 
-### Demo Capability
-Demonstrate natural language queries that correctly handle full task management functionality (add, delete, update, list, complete) and user identification.
+### Kubernetes Secrets
+Properly configured Kubernetes Secrets for all sensitive environment variables with secure mounting in pods.
 
-### Production-Ready Code
-Clean, well-documented code with proper error handling, security measures, and performance considerations.
+### Demo Commands
+Comprehensive set of commands and procedures for demoing the cloud-native deployment with screenshots showing cluster status and application functionality.
+
+### Screenshots and Documentation
+Visual evidence of successful deployment with cluster metrics, pod statuses, and application accessibility through ingress.
 
 ## Governance
 
-This constitution supersedes all other practices and development guidelines for Phase III implementation. Amendments require explicit documentation and approval process. All pull requests and code reviews must verify constitution compliance. Specifications serve as the authoritative source for all implementation decisions.
+This constitution supersedes all other practices and development guidelines for Phase IV implementation. All infrastructure must be AI-generated, with no manual kubectl commands or YAML creation permitted. Amendments require explicit documentation and approval process. All pull requests and code reviews must verify constitution compliance. Specifications serve as the authoritative source for all implementation decisions.
 
-**Version**: 3.0.0 | **Ratified**: 2026-01-06 | **Last Amended**: 2026-01-15
+**Version**: 4.0.0 | **Ratified**: 2026-01-26 | **Last Amended**: 2026-01-26

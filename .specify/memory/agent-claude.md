@@ -1,73 +1,127 @@
-# Claude Agent Context - Phase II Foundation
+# Claude Agent Context - Phase IV: Cloud-Native Kubernetes Deployment
 
-## Project: Phase II – Todo Full-Stack Web Application
+## Project: Phase IV – Local Kubernetes Deployment for Todo Chatbot
 
 ### Tech Stack
 - **Frontend**: Next.js 16+ (App Router), TypeScript, Tailwind CSS
-- **Backend**: Python FastAPI
+- **Backend**: Python FastAPI with Cohere AI integration
 - **Database**: Neon Serverless PostgreSQL
 - **ORM**: SQLModel
 - **Authentication**: Better Auth (JWT)
+- **Containerization**: Docker with Gordon AI optimization
+- **Orchestration**: Kubernetes on Minikube
+- **Package Management**: Helm 3.x charts
+- **AI DevOps Tools**: kubectl-ai, kagent
 
-### Current Phase: Foundation (Part 0) and Task CRUD API (Part 1)
+### Current Phase: Kubernetes Deployment (Phase IV)
 - Monorepo structure with frontend/backend directories
-- FastAPI backend bootstrap
-- SQLModel setup with PostgreSQL connection
-- Task model implementation
-- Environment configuration
-- **NEW**: Task CRUD API endpoints implementation with user isolation
+- AI-generated Dockerfiles for containerization (Gordon-first approach)
+- AI-generated Helm charts for orchestration (kubectl-ai + kagent)
+- Minikube cluster setup with ingress addon
+- Kubernetes Secrets for environment variables
+- Health probes (liveness, readiness, startup)
+- Horizontal Pod Autoscaler configuration
+- Complete AI-assisted deployment workflow
 
-### Database Schema
-- Task model with fields: id (int, PK), user_id (UUID, FK), title (str), description (optional str), completed (bool), timestamps
-- Indexes on user_id and completed fields
-- Proper relationships and validation
+### Kubernetes Resources
+- **Deployments**: Frontend and backend with replica sets
+- **Services**: ClusterIP services for internal communication
+- **Ingress**: External access via hostname routing
+- **Secrets**: Secure storage for sensitive environment variables
+- **HPA**: Horizontal Pod Autoscaler for auto-scaling
+- **NetworkPolicy**: Optional network security (deny-all + allow ingress)
 
 ### File Structure
 ```
 backend/
+├── src/
+│   ├── models/
+│   ├── services/
+│   └── api/
 ├── main.py
 ├── requirements.txt
-├── database/
-│   ├── engine.py
-│   ├── session.py
-│   └── __init__.py
-├── models/
-│   ├── task.py
-│   └── __init__.py
-├── services/
-│   ├── task_service.py
-│   └── __init__.py
-├── api/
-│   ├── task_router.py
-│   └── __init__.py
-└── core/
-    └── config.py
+└── Dockerfile
 
-frontend/ (empty for now)
+frontend/
+├── src/
+│   ├── components/
+│   ├── pages/
+│   └── services/
+├── package.json
+└── Dockerfile
 
-.env.example
-.gitignore
+docker/
+├── frontend.Dockerfile     # AI-generated multi-stage Dockerfile
+└── backend.Dockerfile      # AI-generated multi-stage Dockerfile
+
+charts/
+└── todo/                   # Umbrella Helm chart
+    ├── Chart.yaml
+    ├── values.yaml
+    ├── templates/
+    │   ├── _helpers.tpl
+    │   ├── frontend/
+    │   │   ├── deployment.yaml
+    │   │   ├── service.yaml
+    │   │   └── ingress.yaml
+    │   ├── backend/
+    │   │   ├── deployment.yaml
+    │   │   ├── service.yaml
+    │   │   └── hpa.yaml
+    │   ├── secrets.yaml
+    │   └── networkpolicy.yaml
+    └── charts/             # Subcharts
+        ├── frontend/
+        ├── backend/
+
+k8s/
+└── manifests/              # Generated manifests for reference
+
+specs/1-k8s-deployment/
+├── plan.md
+├── research.md
+├── data-model.md
+├── quickstart.md
+├── contracts/
+│   └── api-contracts.md
+└── tasks.md
+
+.env (local), Kubernetes Secrets (cluster)
 ```
 
-### API Endpoints (Task CRUD)
-- GET /api/{user_id}/tasks - Retrieve all tasks for a user
-- POST /api/{user_id}/tasks - Create a new task for a user
-- GET /api/{user_id}/tasks/{id} - Retrieve a specific task
-- PUT /api/{user_id}/tasks/{id} - Update a specific task
-- DELETE /api/{user_id}/tasks/{id} - Delete a specific task
-- PATCH /api/{user_id}/tasks/{id}/complete - Update task completion status
+### Kubernetes Configuration
+- **Minikube**: Started with --driver=docker --cpus=4 --memory=8192
+- **Ingress**: Enabled with minikube tunnel for hostname access
+- **Images**: todo-frontend:latest, todo-backend:latest
+- **Secrets**: todo-secrets containing BETTER_AUTH_SECRET, COHERE_API_KEY, DATABASE_URL
+- **Health Probes**: startupProbe (30s), liveness (10s), readiness (5s)
+- **Resources**: Requests (256Mi/0.2 CPU), Limits (512Mi/0.5 CPU)
 
-### Environment Variables
-- DATABASE_URL: PostgreSQL connection string
-- Proper .env.example and .gitignore configuration
+### Environment Variables in Kubernetes
+- BETTER_AUTH_SECRET: From Kubernetes Secret
+- COHERE_API_KEY: From Kubernetes Secret
+- DATABASE_URL: From Kubernetes Secret (Neon PostgreSQL connection)
+- BACKEND_API_URL: Internal service URL (http://backend-service:80)
 
-### Implementation Notes
-- Use SQLModel for database models combining SQLAlchemy and Pydantic
-- FastAPI for backend framework with automatic API documentation
-- UUID for user_id field in Task model
-- Automatic timestamp generation for created_at and updated_at
-- Proper foreign key relationships between tasks and users
-- **NEW**: User isolation by filtering all operations by user_id parameter in URL
-- **NEW**: Consistent response models and proper validation
-- **NEW**: Standard HTTP status codes (200, 201, 204, 404, 422) for error handling
-- **NEW**: No JWT authentication in this phase (auth comes in Part 2)
+### AI Tool Integration
+- **Gordon**: Container optimization and security scanning
+- **kubectl-ai**: Kubernetes manifest generation and troubleshooting
+- **kagent**: Cluster health analysis and optimization suggestions
+- **Helm**: Package management for Kubernetes applications
+
+### Deployment Workflow
+1. Minikube cluster initialization
+2. Docker image building and tagging
+3. Kubernetes Secret creation
+4. Helm chart generation (AI-assisted)
+5. Helm deployment to cluster
+6. Health verification and scaling
+7. Ingress access setup
+8. Full application testing
+
+### Security Measures
+- Non-root containers with security contexts
+- Read-only root filesystem where possible
+- Kubernetes Secrets for sensitive data
+- Network policies for service communication
+- Proper RBAC and privilege separation

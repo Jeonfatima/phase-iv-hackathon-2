@@ -4,7 +4,7 @@
 
 - Python 3.11+ with pip
 - Node.js 18+ with npm/yarn
-- Cohere API Key (contact admin or use provided key: YOUR_COHERE_API_KEY_HERE)
+- Cohere API Key 
 - PostgreSQL database (Neon DB recommended)
 - Better Auth configured for user authentication
 
